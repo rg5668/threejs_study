@@ -27,7 +27,8 @@
     "webpack-dev-server": "^4.11.1"
   },
   "dependencies": {
-    "gsap": "^3.11.4",
+    "dat.gui": "^0.7.9",
+    "stats.js": "^0.17.0",
     "three": "^0.148.0"
   }
 }
