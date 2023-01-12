@@ -1,0 +1,28 @@
+body {
+  margin: 0;
+}
+#three-canvas {
+  /* position: absolute; */
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+.sections {
+  position: relative;
+  z-index: 1;
+}
+.section {
+  padding: 5rem;
+  height: 100vh;
+  /* padding 이 영역 넘어 잡고 있어서 border-box를 사용하여 영역을 포함한다. */
+  box-sizing: border-box;
+}
+.section h2 {
+  margin: 0;
+  /* vmin은 스마트폰 비율에 맞춰 대응하는 폰트크기로 많이 사용된다. */
+  font-size: 10vmin;
+}
+/* odd는 홀수 even은 짝수로 html element를 선택하여 css를 먹일 수 있음 */
+.section:nth-child(odd) {
+  text-align: right;
+}
