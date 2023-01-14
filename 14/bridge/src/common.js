@@ -19,6 +19,7 @@ export const cm2 = {
   step: 0,
   backgroundColor: "#3e1322",
   lightColor: "#ffe9ac",
+  lightOffColor: "#222",
   pillarColor: "#071d28",
   floorColor: "#111",
   barColor: "#441c1d",
@@ -48,6 +49,16 @@ export const mat = {
     color: cm2.glassColor,
     // 불투명도 추가
     transparent: true,
-    opacity: 0.3,
+    opacity: 0.1,
   }),
+};
+
+const normalSound = new Audio();
+normalSound.src = "/sounds/Crash .mp3";
+const strongSound = new Audio();
+strongSound.src = "/sounds/Wood Hit Metal Crash.mp3";
+
+export const sounds = {
+  normal: normalSound,
+  strong: strongSound,
 };

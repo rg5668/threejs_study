@@ -1,0 +1,30 @@
+body {
+  margin: 0;
+}
+li {
+  list-style: none;
+}
+#three-canvas {
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-color: gray;
+  z-index: -1;
+}
+.view-item {
+  display: flex;
+  margin: 30px;
+}
+.view-item:nth-child(even) .canvas-placeholder {
+  order: 1;
+  margin-left: 30px;
+}
+.view-item:nth-child(odd) .canvas-placeholder {
+  order: 0;
+  margin-right: 30px;
+}
+.canvas-placeholder {
+  width: 300px;
+  height: 200px;
+  border: 1px solid black;
+}

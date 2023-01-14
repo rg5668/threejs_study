@@ -9,6 +9,7 @@ import { Floor } from "./Floor";
 import { Pillar } from "./Pillar";
 import { SideLight } from "./SideLight";
 import { Player } from "./Player";
+import { PreventDragClick } from "./PreventDragClick";
 
 // ----- 주제: The Bridge 게임 만들기
 
@@ -35,10 +36,16 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
+// 떨어질때 카메라 하나 더 추가
+const camera2 = camera.clone();
+
 camera.position.x = -4;
 camera.position.y = 19;
 camera.position.z = 14;
-cm1.scene.add(camera);
+
+cm1.scene.add(camera, camera2);
+camera2.position.y = 0;
+camera2.lookAt(0, 1, 0);
 
 // Light
 const ambientLight = new THREE.AmbientLight(cm2.lightColor, 0.8);
@@ -166,24 +173,24 @@ const bar4 = new Bar({
   z: 0,
 });
 
-// const sideLight = new SideLight({
-//   name: "sideLight",
-//   container: bar1.mesh,
-//   z: -5,
-// });
+const sideLights = [];
 
 for (let i = 0; i < 49; i++) {
-  new SideLight({
-    name: "sideLight",
-    container: bar1.mesh,
-    z: i * 0.5 - glassUnitSize * 10,
-  });
+  sideLights.push(
+    new SideLight({
+      name: "sideLight",
+      container: bar1.mesh,
+      z: i * 0.5 - glassUnitSize * 10,
+    })
+  );
 
-  new SideLight({
-    name: "sideLight",
-    container: bar4.mesh,
-    z: i * 0.5 - glassUnitSize * 10,
-  });
+  sideLights.push(
+    new SideLight({
+      name: "sideLight",
+      container: bar4.mesh,
+      z: i * 0.5 - glassUnitSize * 10,
+    })
+  );
 }
 
 // 유리판
@@ -264,13 +271,16 @@ function checkIntersects() {
 
 let fail = false;
 let jumping = false;
+let onReplay = false;
 
 function checkClickedObject(mesh) {
   if (mesh.name.indexOf("glass") >= 0) {
     // 유리판을 클릭했을 때
     if (jumping || fail) return;
-
     if (mesh.step - 1 === cm2.step) {
+      // 점프할때 카운트 + 올라감 액션 실행
+      player.actions[2].stop();
+      player.actions[2].play();
       jumping = true;
       cm2.step++;
       console.log(cm2.step);
@@ -280,6 +290,22 @@ function checkClickedObject(mesh) {
           console.log("normal");
           const timerId = setTimeout(() => {
             fail = true;
+            // 떨어질때 액션
+            player.actions[0].stop();
+            player.actions[1].play();
+
+            sideLights.forEach((item) => {
+              item.turnOff();
+            });
+
+            const timerId2 = setTimeout(() => {
+              onReplay = true;
+              player.cannonBody.position.y = 9;
+
+              const timerId3 = setTimeout(() => {
+                onReplay = false;
+              }, 3000);
+            }, 2000);
           }, 700);
           break;
         case "strong":
@@ -301,6 +327,25 @@ function checkClickedObject(mesh) {
         duration: 0.4,
         y: 12,
       });
+
+      // 클리어!
+      if (cm2.step === numberOfGlass && mesh.type === "strong") {
+        const timeId = setTimeout(() => {
+          player.actions[2].stop();
+          player.actions[2].play();
+
+          gsap.to(player.cannonBody.position, {
+            duration: 1,
+            x: 0,
+            z: -14,
+          });
+
+          gsap.to(player.cannonBody.position, {
+            duration: 0.4,
+            y: 12,
+          });
+        }, 1500);
+      }
     }
   }
 }
@@ -314,9 +359,9 @@ function draw() {
   objects.forEach((item) => {
     if (item.cannonBody) {
       if (item.name === "player") {
-        item.mesh.position.copy(item.cannonBody.position);
+        // item.mesh.position.copy(item.cannonBody.position);
         // 빠르게 눌렀을때 엎어지는거 방지
-        if (fail) item.mesh.quaternion.copy(item.cannonBody.quaternion);
+        // if (fail) item.mesh.quaternion.copy(item.cannonBody.quaternion);
 
         if (item.modelMesh) {
           item.modelMesh.position.copy(item.cannonBody.position);
@@ -337,7 +382,14 @@ function draw() {
 
   controls.update();
 
-  renderer.render(cm1.scene, camera);
+  if (!onReplay) {
+    renderer.render(cm1.scene, camera);
+  } else {
+    // 떨어질때 카메라 변경
+    renderer.render(cm1.scene, camera2);
+    camera2.position.z = player.cannonBody.position.z;
+    camera2.position.x = player.cannonBody.position.x;
+  }
   renderer.setAnimationLoop(draw);
 }
 
@@ -349,9 +401,15 @@ function setSize() {
 }
 
 // 이벤트
+
 window.addEventListener("resize", setSize);
+
+//드레그 방지
+const preventDragClick = new PreventDragClick(canvas);
+
+// 클릭해서 오브젝트 알아내기
 canvas.addEventListener("click", (e) => {
-  //   if (preventDragClick.mouseMoved) return;
+  if (preventDragClick.mouseMoved) return;
   mouse.x = (e.clientX / canvas.clientWidth) * 2 - 1;
   mouse.y = -((e.clientY / canvas.clientHeight) * 2 - 1);
   checkIntersects();
