@@ -29,6 +29,8 @@ export class CreateScene {
     this.camera.position.z = cameraPosition.z;
 
     this.scene.add(this.camera);
+
+    this.meshes = [];
   }
 
   set(func) {
@@ -48,10 +50,14 @@ export class CreateScene {
       return;
     }
 
+    // 화면 비율에 맞춰서 변경 (aspect를 변경 안해준다면 메쉬도 같이 줄어든다.)
+    this.camera.aspect = rect.width / rect.height;
+    this.camera.updateProjectionMatrix();
+
     const canvasBottom = renderer.domElement.clientHeight - rect.bottom;
     renderer.setScissor(rect.left, canvasBottom, rect.width, rect.height);
-    renderer.setScissorTest(true);
     renderer.setViewport(rect.left, canvasBottom, rect.width, rect.height);
+    renderer.setScissorTest(true);
 
     renderer.render(this.scene, this.camera);
   }
