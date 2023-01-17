@@ -67,7 +67,7 @@ export default function example() {
     map: texture,
   });
   const mesh = new THREE.Mesh(geometry, material);
-
+  console.log(material);
   scene.add(mesh);
 
   // 그리기
